@@ -47,36 +47,7 @@ namespace DungeonExplorer
 
             while (playing)
             {
-                Console.Clear();
-                // Use of Room.GetDescription()
-                Console.WriteLine($"{player.Name}, you are in the {player.CurrentRoom.Name}. {player.CurrentRoom.GetDescription()}.");
                 Menu();
-                Console.Write("> ");
-                string menuInput = Console.ReadLine();
-
-                if (menuInput == "1")
-                {
-                    // View Inventory
-                    Console.Clear();
-                    Console.WriteLine($"Your Inventory: {player.InventoryContents()}\n");
-                    Console.WriteLine("Press any key to continue...");
-                    Console.ReadLine();
-                }
-                else if (menuInput == "2")
-                {
-                    // Shows Stats
-                    Console.Clear();
-                    Console.WriteLine("Your Stats:");
-                    Console.WriteLine($"HEALTH: {player.Health} DAMAGE: {player.Damage}\n");
-                    Console.WriteLine("Press any key to continue...");
-                    Console.ReadLine();
-                }
-                else if (menuInput == "3")
-                    // Navigate Map
-                    Navigation();
-                else if (menuInput == "4")
-                    // Quits the game
-                    Quit();
             }
         }
 
@@ -90,11 +61,46 @@ namespace DungeonExplorer
         // Display the menu for the user
         public void Menu()
         {
+            Console.Clear();
+            // Use of Room.GetDescription()
+            Console.WriteLine($"{player.Name}, you are in the {player.CurrentRoom.Name}. {player.CurrentRoom.GetDescription()}.");
             Console.WriteLine("Actions");
             Console.WriteLine("1. View Inventory");
             Console.WriteLine("2. Show Stats");
             Console.WriteLine("3. Travel");
-            Console.WriteLine("4. Quit");
+            Console.WriteLine("4. Quit"); Console.Write("> ");
+            string menuInput = Console.ReadLine();
+
+            if (menuInput == "1")
+            {
+                // View Inventory
+                Console.Clear();
+                Console.WriteLine($"Your Inventory: {player.InventoryContents()}\n");
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadLine();
+            }
+            else if (menuInput == "2")
+            {
+                // Shows Stats
+                Console.Clear();
+                Console.WriteLine("Your Stats:");
+                Console.WriteLine($"HEALTH: {player.Health} DAMAGE: {player.Damage}\n");
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadLine();
+            }
+            else if (menuInput == "3")
+                // Navigate Map
+                Navigation();
+            else if (menuInput == "4")
+                // Quits the game
+                Quit();
+            else
+            {
+                Console.WriteLine("This is not a valid input. Try again!");
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadLine();
+            }
+            Menu();
         }
 
         public void Navigation()
@@ -109,14 +115,18 @@ namespace DungeonExplorer
                     Console.WriteLine("- North (The Safe Room)");
                 if (player.CurrentRoom.South == true)
                     Console.WriteLine("- South (The Monster Room)");
+                Console.WriteLine("'back' to go to the menu.");
                 Console.Write("> ");
                 string navigationInput = Console.ReadLine().ToLower();
 
+                if (navigationInput == "back")
+                {
+                    Menu();
+                }
+
                 // Quits the game
                 if (navigationInput == "quit")
-                {
                     Quit();
-                }
 
                 // Travels north if the user inputs north
                 if (navigationInput == "north" || navigationInput == "n")
@@ -129,7 +139,11 @@ namespace DungeonExplorer
                         break;
                     }
                     else
+                    {
                         Console.WriteLine("You cannot go North.");
+                        Console.WriteLine("Press any key to continue...");
+                        Console.ReadKey();
+                    }
                 }
 
                 // Travels south if the user inputs south
@@ -139,12 +153,16 @@ namespace DungeonExplorer
                     {
                         player.CurrentRoom = monsterRoom;
                         Console.WriteLine($"Moving to {player.CurrentRoom.Name}...");
-                        Thread.Sleep(1000);
+                        Thread.Sleep(2000);
                         CheckMonsterRoom();
                         break;
                     }
                     else
+                    {
                         Console.WriteLine("You cannot go South.");
+                        Console.WriteLine("Press any key to continue...");
+                        Console.ReadKey();
+                    }
                 }
             }
         }
