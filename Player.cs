@@ -7,7 +7,7 @@ namespace DungeonExplorer
         private Room _currentRoom;
         private string _name;
         private int _health;
-        private int _damage;
+        private int _damage; 
         private List<string> inventory = new List<string>();
 
         public Player(Room currentroom, string name, int health, int damage) 

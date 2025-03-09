@@ -39,7 +39,11 @@ namespace DungeonExplorer
 
                 if (player.Name.Any(char.IsDigit))
                     Console.WriteLine("Please use only characters, try again!");
-                else if (player.Name.Any(char.IsLetter))
+                else if (player.Name.Length > 16)
+                    Console.WriteLine("Your name must be less than 16 characters!");
+                else if (player.Name == "")
+                    Console.WriteLine("This is invalid. Please try again!");
+                else if (player.Name.All(char.IsLetter))
                     break;
                 else
                     Console.WriteLine("This is invalid. Please try again!");
@@ -119,10 +123,9 @@ namespace DungeonExplorer
                 Console.Write("> ");
                 string navigationInput = Console.ReadLine().ToLower();
 
+                // Allows player to leave to the main menu
                 if (navigationInput == "back")
-                {
                     Menu();
-                }
 
                 // Quits the game
                 if (navigationInput == "quit")
@@ -138,12 +141,6 @@ namespace DungeonExplorer
                         Thread.Sleep(1000);
                         break;
                     }
-                    else
-                    {
-                        Console.WriteLine("You cannot go North.");
-                        Console.WriteLine("Press any key to continue...");
-                        Console.ReadKey();
-                    }
                 }
 
                 // Travels south if the user inputs south
@@ -157,12 +154,25 @@ namespace DungeonExplorer
                         CheckMonsterRoom();
                         break;
                     }
-                    else
-                    {
-                        Console.WriteLine("You cannot go South.");
-                        Console.WriteLine("Press any key to continue...");
-                        Console.ReadKey();
-                    }
+                }
+
+                // Error checking preventing the player from entering a room that does not exist
+                else if (navigationInput == "west" || navigationInput == "w")
+                {
+                    Console.WriteLine("Invalid direction. Please try again!");
+                    Console.ReadKey();
+                }
+
+                else if (navigationInput == "east" || navigationInput == "e")
+                {
+                    Console.WriteLine("Invalid direction. Please try again!");
+                    Console.ReadKey();
+                }
+
+                else
+                {
+                    Console.WriteLine("Invalid input. Please try again!");
+                    Console.ReadKey();
                 }
             }
         }
