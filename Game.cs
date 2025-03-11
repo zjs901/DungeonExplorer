@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Media;
-using System.Reflection;
 using System.Threading;
 
 namespace DungeonExplorer
