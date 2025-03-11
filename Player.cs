@@ -18,6 +18,8 @@ namespace DungeonExplorer
             Damage = damage;
 
         }
+
+        // Getters and setters, for the players, current room, name, health, and damage
         public void PickUpItem(string item)
         {
             inventory.Add(item);

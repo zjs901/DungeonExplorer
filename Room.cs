@@ -18,6 +18,7 @@
 
         }
 
+        // Getters and setters, for the rooms, name, description, if there is a monster or not, and the directions
         public string GetDescription()
         {
             return _description;

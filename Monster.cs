@@ -25,6 +25,7 @@ namespace DungeonExplorer
             _item = item;
         }
 
+        // Getters and setters, for the monsters, name, health, max damage, min damage, alive status and the item it drops
         public string Name
         {
             get

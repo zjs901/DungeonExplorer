@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Media;
 using System.Reflection;
@@ -28,6 +29,8 @@ namespace DungeonExplorer
         public void Start()
         {
             bool playing = true;
+            
+            // Combat(); - [testing purposes]
 
             Console.WriteLine("Welcome to the Dungeon!");
 
@@ -207,10 +210,21 @@ namespace DungeonExplorer
                     // Monster hits back
                     int monsterAttack = rand.Next(monster.MinDamage, monster.MaxDamage);
                     player.Health -= monsterAttack;
+
+                    // Sets monster health to 0, if the monster is less than 0, after players attack
+                    if (monster.Health < 0)
+                        monster.Health = 0;
+
                     Console.WriteLine($"{monster.Name} hit back for {monsterAttack} damage.");
                     Console.WriteLine($"You have {player.Health} health\n{monster.Name} has {monster.Health} health.");
                     Console.WriteLine("\nPress any key to continue...");
                     Console.ReadLine();
+
+                    // Check player health is not below 0 after taking damage
+                    // Debug.Assert(player.Health >= 0, $"Player's health is less than 0: {player.Health}");
+
+                    // Check monster health is not below 0 after being attacked
+                    // Debug.Assert(monster.Health >= 0, $"Monster's health is less than 0: {monster.Health}");
 
                 }
 
@@ -255,7 +269,8 @@ namespace DungeonExplorer
                     Console.WriteLine("Invalid input, try again...");
             }
 
-            // When you break out of the combat while loop, set the monster to dead 
+            // When you break out of the combat while loop, set the monster to dead
+            //monster.Health = 0;
             monster.IsAlive = false;
             CheckMonsterDead();
         }
@@ -273,6 +288,9 @@ namespace DungeonExplorer
         // Checks if the monster is dead, so we can drop the item
         public void CheckMonsterDead()
         {
+            // Check if the monster health is exactly 0 when dead. If not, there is an error message
+            // Debug.Assert(monster.Health == 0, $"Monster health should be 0 when killed. Monster Health is: {monster.Health}");
+
             if (monster.IsAlive == false)
             {
                 Console.WriteLine($"You killed {monster.Name}! They dropped an item: '{monster.Item}'.");
