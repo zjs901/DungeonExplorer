@@ -19,7 +19,7 @@ namespace DungeonExplorer
             safeRoom = new Room("The Safe Room", "Take a seat, and relax", false, false, true);
             monsterRoom = new Room("The Monster Room", "A dark room, that could contain monsters", true, true, false);
 
-            player = new Player(safeRoom, "", 100, 8);
+            player = new Player(safeRoom, "", 100, 20, 10);
 
             monster = new Monster("The Kernel", 50, 15, 10, true, "Diamond Key");
 
@@ -89,7 +89,7 @@ namespace DungeonExplorer
                 // Shows Stats
                 Console.Clear();
                 Console.WriteLine("Your Stats:");
-                Console.WriteLine($"HEALTH: {player.Health} DAMAGE: {player.Damage}\n");
+                Console.WriteLine($"HEALTH: {player.Health} DAMAGE: {player.MinDamage}-{player.MaxDamage}\n");
                 Console.WriteLine("Press any key to continue...");
                 Console.ReadLine();
             }
@@ -179,98 +179,112 @@ namespace DungeonExplorer
         }
 
         // Starts the combat system
-        public void Combat()
+        public void Combat() {
+            
+        while (player.Health > 0 && monster.Health > 0)
         {
-            while (player.Health > 0 && monster.Health > 0)
+            Console.Clear();
+            Console.WriteLine($"An enemy has appeared! It's {monster.Name}.");
+            Console.WriteLine($"HEALTH: {monster.Health} DAMAGE: {monster.MinDamage}-{monster.MaxDamage}");
+            Console.WriteLine("What do you want to do?");
+            Console.WriteLine("1. Attack");
+            Console.WriteLine("2. Defend");
+            Console.WriteLine("3. Inventory");
+            Console.WriteLine("4. Run");
+            Console.Write("> ");
+            
+            // Added null check
+            string combatInput = Console.ReadLine()?.Trim();
+
+            // Attack the monster
+            if (combatInput == "1")
             {
                 Console.Clear();
-                Console.WriteLine($"An enemy has appeared! It's {monster.Name}.");
-                Console.WriteLine($"HEALTH: {monster.Health} DAMAGE: {monster.MinDamage}-{monster.MaxDamage}");
-                Console.WriteLine("What do you want to do?");
-                Console.WriteLine("1. Attack");
-                Console.WriteLine("2. Defend");
-                Console.WriteLine("3. Inventory");
-                Console.WriteLine("4. Run");
-                Console.Write("> ");
-                string combatInput = Console.ReadLine();
+                Console.WriteLine("Attacking...");
 
-                // Attack the monster
-                if (combatInput == "1")
+                // Player attacks first
+                int playerAttack = rand.Next(player.MinDamage, player.MaxDamage);
+                monster.Health -= playerAttack;
+                Console.WriteLine($"You hit {monster.Name} for {playerAttack} damage.");
+
+                // Check if monster is dead before it can counterattack
+                if (monster.Health <= 0)
                 {
-                    Console.Clear();
-                    Console.WriteLine("Attacking...");
-
-                    // Hit the monster
-                    monster.Health -= player.Damage;
-                    Console.WriteLine($"You hit {monster.Name} for {player.Damage} damage.");
-                    Thread.Sleep(1500);
-
-                    // Monster hits back
-                    int monsterAttack = rand.Next(monster.MinDamage, monster.MaxDamage);
-                    player.Health -= monsterAttack;
-
-                    // Sets monster health to 0, if the monster is less than 0, after players attack
-                    if (monster.Health < 0)
-                        monster.Health = 0;
-
-                    Console.WriteLine($"{monster.Name} hit back for {monsterAttack} damage.");
-                    Console.WriteLine($"You have {player.Health} health\n{monster.Name} has {monster.Health} health.");
-                    Console.WriteLine("\nPress any key to continue...");
-                    Console.ReadLine();
-
-                    // Check player health is not below 0 after taking damage
-                    // Debug.Assert(player.Health >= 0, $"Player's health is less than 0: {player.Health}");
-
-                    // Check monster health is not below 0 after being attacked
-                    // Debug.Assert(monster.Health >= 0, $"Monster's health is less than 0: {monster.Health}");
-
+                    monster.Health = 0;
                 }
 
-                // Defend attack from the monster
-                else if (combatInput == "2")
-                {
-                    Console.Clear();
-                    Console.WriteLine("Defending...");
-                    Thread.Sleep(1500);
+                // Monster counterattacks
+                int monsterAttack = rand.Next(monster.MinDamage, monster.MaxDamage + 1);
+                player.Health -= monsterAttack;
+                
+                // Ensure health doesn't go below 0
+                player.Health = Math.Max(0, player.Health);
 
-                    int monsterAttack = rand.Next(monster.MinDamage, monster.MaxDamage);
-                    int defendAttack = monsterAttack / 4;
-                    player.Health -= defendAttack;
-                    Console.WriteLine($"You defended the hit from {monster.Name}. They did {defendAttack} damage.");
-                    Console.WriteLine($"You have {player.Health} health\n{monster.Name} has {monster.Health} health.");
-                    Console.WriteLine("\nPress any key to continue...");
-                    Console.ReadLine();
-
-                }
-
-                // View inventory
-                else if (combatInput == "3")
-                {
-                    Console.Clear();
-                    Console.WriteLine($"Inventory: {player.InventoryContents()}");
-                    Console.WriteLine("Press any key to continue...");
-                    Console.ReadLine();
-                }
-
-                // Run from the monster
-                else if (combatInput == "4")
-                {
-                    Console.Clear();
-                    Console.WriteLine("You ran back to the safe room.");
-                    player.CurrentRoom = safeRoom;
-                    monster.Health = 50;
-                    Console.WriteLine("Press any key to continue...");
-                    Console.ReadLine();
-                    Navigation();
-                }
-                else
-                    Console.WriteLine("Invalid input, try again...");
+                Console.WriteLine($"{monster.Name} hit back for {monsterAttack} damage.");
+                Console.WriteLine($"You have {player.Health} health\n{monster.Name} has {monster.Health} health.");
+                Console.WriteLine("\nPress any key to continue...");
+                Console.ReadLine();
             }
+            // Defend attack from the monster
+            else if (combatInput == "2")
+            {
+                Console.Clear();
+                Console.WriteLine("Defending...");
 
-            // When you break out of the combat while loop, set the monster to dead
-            //monster.Health = 0;
-            monster.IsAlive = false;
-            CheckMonsterDead();
+                int monsterAttack = rand.Next(monster.MinDamage, monster.MaxDamage + 1);
+                int defendAttack = monsterAttack / 2;
+                player.Health -= defendAttack;
+                
+                // Ensure health doesn't go below 0
+                player.Health = Math.Max(0, player.Health);
+                
+                Console.WriteLine($"You defended against {monster.Name}'s attack, reducing damage from {monsterAttack} to {defendAttack}.");
+                Console.WriteLine($"You have {player.Health} health\n{monster.Name} has {monster.Health} health.");
+                Console.WriteLine("\nPress any key to continue...");
+                Console.ReadLine();
+            }
+            // View inventory
+            else if (combatInput == "3")
+            {
+                Console.Clear();
+                Console.WriteLine($"Inventory: {player.InventoryContents()}");
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadLine();
+            }
+            // Run from the monster
+            else if (combatInput == "4")
+            {
+                Console.Clear();
+                Console.WriteLine("You ran back to the safe room.");
+                player.CurrentRoom = safeRoom;
+                monster.Health = 50;
+                Console.WriteLine("Press any key to continue...");
+                Console.ReadLine();
+                Navigation();
+                return;
+            }
+            else
+            {
+                Console.WriteLine("Invalid input, try again...");
+                Console.ReadLine();
+            }
+        }
+
+        // Combat results
+        if (player.Health <= 0)
+        {
+            Console.WriteLine($"You died to the {monster.Name}!");
+            player.Health = 0;
+            GameOver();
+        }
+        else if (monster.Health <= 0)
+        {
+            Console.WriteLine($"You killed {monster.Name}!");
+            monster.Health = 0;
+            MonsterDeath();
+        }
+        Console.ReadKey();
+        monster.IsAlive = false; 
         }
 
         // Checks if monster is alive or not, if so, start combat
@@ -284,20 +298,24 @@ namespace DungeonExplorer
         }
 
         // Checks if the monster is dead, so we can drop the item
-        public void CheckMonsterDead()
+        public void MonsterDeath()
         {
             // Check if the monster health is exactly 0 when dead. If not, there is an error message
             // Debug.Assert(monster.Health == 0, $"Monster health should be 0 when killed. Monster Health is: {monster.Health}");
+            
+            Console.WriteLine($"They dropped an item: '{monster.Item}'.");
+            // Use of Player.PickUpItem
+            player.PickUpItem(monster.Item);
+            Console.WriteLine($"+1 {monster.Item}");
+            Console.WriteLine("Press any key to continue...");
+            Console.ReadKey();
+        }
 
-            if (monster.IsAlive == false)
-            {
-                Console.WriteLine($"You killed {monster.Name}! They dropped an item: '{monster.Item}'.");
-                // Use of Player.PickUpItem
-                player.PickUpItem(monster.Item);
-                Console.WriteLine($"+1 {monster.Item}");
-                Console.WriteLine("Press any key to continue...");
-                Console.ReadLine();
-            }
+        public void GameOver()
+        {
+            Console.Clear();
+            Console.WriteLine("Game Over! You lose...");
+            Environment.Exit(0);
         }
     }
 }

@@ -7,16 +7,17 @@ namespace DungeonExplorer
         private Room _currentRoom;
         private string _name;
         private int _health;
-        private int _damage; 
+        private int _maxDamage;
+        private int _minDamage;        
         private List<string> inventory = new List<string>();
 
-        public Player(Room currentroom, string name, int health, int damage) 
+        public Player(Room currentroom, string name, int health, int maxDamage, int minDamage) 
         {
             CurrentRoom = currentroom;
             Name = name;
             Health = health;
-            Damage = damage;
-
+            MaxDamage = maxDamage;
+            MinDamage = minDamage;
         }
 
         // Getters and setters, for the players, current room, name, health, and damage
@@ -55,15 +56,26 @@ namespace DungeonExplorer
             }
         }
 
-        public int Damage
+        public int MaxDamage
         {
             get
             {
-                return _damage;
+                return _maxDamage;
             }
             set
             {
-                _damage = value;
+                _maxDamage = value;
+            }
+        }
+        public int MinDamage
+        {
+            get
+            {
+                return _minDamage;
+            }
+            set
+            {
+                _minDamage = value;
             }
         }
     }
