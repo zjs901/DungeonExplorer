@@ -21,7 +21,7 @@ namespace DungeonExplorer
 
             player = new Player(safeRoom, "", 100, 20, 10);
 
-            monster = new Monster("The Kernel", 50, 15, 10, true, "Diamond Key");
+            monster = new Monster(monsterRoom, "The Kernel", 50, 15, 5, true, "Diamond Key");
 
         }
         public void Start()
@@ -203,9 +203,7 @@ namespace DungeonExplorer
                 Console.WriteLine("Attacking...");
 
                 // Player attacks first
-                int playerAttack = rand.Next(player.MinDamage, player.MaxDamage);
-                monster.Health -= playerAttack;
-                Console.WriteLine($"You hit {monster.Name} for {playerAttack} damage.");
+                player.Attack(monster);
 
                 // Check if monster is dead before it can counterattack
                 if (monster.Health <= 0)
@@ -214,13 +212,11 @@ namespace DungeonExplorer
                 }
 
                 // Monster counterattacks
-                int monsterAttack = rand.Next(monster.MinDamage, monster.MaxDamage + 1);
-                player.Health -= monsterAttack;
+                monster.Attack(player);
                 
                 // Ensure health doesn't go below 0
                 player.Health = Math.Max(0, player.Health);
 
-                Console.WriteLine($"{monster.Name} hit back for {monsterAttack} damage.");
                 Console.WriteLine($"You have {player.Health} health\n{monster.Name} has {monster.Health} health.");
                 Console.WriteLine("\nPress any key to continue...");
                 Console.ReadLine();
