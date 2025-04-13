@@ -3,16 +3,17 @@ using System;
 
 namespace DungeonExplorer
 {
+    // Use of abstract class
     public class Player : Creature
     {
-        protected List<string> inventory = new List<string>();
+        public List<string> inventory = new List<string>();
 
         public Player(Room safeRoom, string name, int health, int maxDamage, int minDamage) 
             : base(safeRoom, name, health, maxDamage, minDamage)
         {
             
         }
-
+        // Use of override
         public override void Attack(Creature target)
         {
             int playerAttack = rand.Next(MinDamage,MaxDamage);

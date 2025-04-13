@@ -2,6 +2,8 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Collections.Generic;  
+
 
 namespace DungeonExplorer
 {
@@ -9,21 +11,57 @@ namespace DungeonExplorer
     {
         Random rand = new Random();
         private Player player;
-        public Room safeRoom { get; private set; }
-        public Room monsterRoom { get; private set; }
         public Monster monster { get; private set; }
+        // Rooms
+        public Room entrance { get; private set; }
+        public Room monsterRoom { get; private set; }
+        public Room chestRoom { get; private set; }
+        public Room bossRoom { get; private set; }
+        
+        private List<Room> _rooms;
+        private Room _entrance;
+
 
         public Game()
         {
-            // Initialize the game with rooms and one player
-            safeRoom = new Room("The Safe Room", "Take a seat, and relax", false, false, true);
-            monsterRoom = new Room("The Monster Room", "A dark room, that could contain monsters", true, true, false);
-
-            player = new Player(safeRoom, "", 100, 20, 10);
-
+            InitializeRooms();
+            player = new Player(StartingRoom(), "", 100, 15, 10);
             monster = new Monster(monsterRoom, "The Kernel", 50, 15, 5, true, "Diamond Key");
-
         }
+
+        public void InitializeRooms()
+        {
+            // Initialize the game with rooms and one player
+            _rooms = new List<Room>(); // Create lists of rooms
+            entrance = new Room("Entrance", "PLACEHOLDER", false);
+            monsterRoom = new Room("Monster Room", "PLACEHOLDER", false);
+            chestRoom = new Room("Chest Room", "PLACEHOLDER", false);
+            bossRoom = new Room("Boss Room", "PLACEHOLDER", true);
+            
+            // Connecting Rooms
+            entrance.East = chestRoom;
+            entrance.West = monsterRoom;
+            entrance.South = bossRoom;
+            
+            monsterRoom.East = entrance;
+
+            chestRoom.West = entrance;
+            
+            bossRoom.North = entrance;
+            
+            _rooms.Add(entrance);
+            _rooms.Add(monsterRoom);
+            _rooms.Add(chestRoom);
+            _rooms.Add(bossRoom);
+            
+            _entrance = entrance;
+        }
+
+        public Room StartingRoom()
+        {
+            return _entrance;
+        }
+        
         public void Start()
         {
             bool playing = true;
@@ -50,6 +88,7 @@ namespace DungeonExplorer
                     Console.WriteLine("This is invalid. Please try again!");
             }
 
+            player.CurrentRoom = StartingRoom();
             while (playing)
             {
                 Menu();
@@ -73,7 +112,8 @@ namespace DungeonExplorer
             Console.WriteLine("1. View Inventory");
             Console.WriteLine("2. Show Stats");
             Console.WriteLine("3. Travel");
-            Console.WriteLine("4. Quit"); Console.Write("> ");
+            Console.WriteLine("4. Check Room");
+            Console.WriteLine("5. Quit"); Console.Write("> ");
             string menuInput = Console.ReadLine();
 
             if (menuInput == "1")
@@ -97,6 +137,9 @@ namespace DungeonExplorer
                 // Navigate Map
                 Navigation();
             else if (menuInput == "4")
+                // Checks room for items etc...
+                CheckRoom(player.CurrentRoom);
+            else if (menuInput == "5")
                 // Quits the game
                 Quit();
             else
@@ -112,68 +155,55 @@ namespace DungeonExplorer
         {
             while (true)
             {
-                // Displays where the player is, and where they can travel to
                 Console.Clear();
-                Console.WriteLine($"You are in {player.CurrentRoom.Name}");
-                Console.WriteLine("Available destinations:");
-                if (player.CurrentRoom.North == true)
-                    Console.WriteLine("- North (The Safe Room)");
-                if (player.CurrentRoom.South == true)
-                    Console.WriteLine("- South (The Monster Room)");
-                Console.WriteLine("'back' to go to the menu.");
-                Console.Write("> ");
-                string navigationInput = Console.ReadLine().ToLower();
+                Console.WriteLine($"You are in the {player.CurrentRoom.Name}.");
 
+                if (player.CurrentRoom.Creature)
+                {
+                    Combat();
+                }
+                Console.Clear();
+                Console.WriteLine("Travel:");
+                if (player.CurrentRoom.North != null) Console.WriteLine($"- North to {player.CurrentRoom.North.Name}");
+                if (player.CurrentRoom.South != null) Console.WriteLine($"- South to {player.CurrentRoom.South.Name}");
+                if (player.CurrentRoom.East != null) Console.WriteLine($"- East to {player.CurrentRoom.East.Name}");
+                if (player.CurrentRoom.West != null) Console.WriteLine($"- West to {player.CurrentRoom.West.Name}");
+                
+                Console.Write(">");
+                string input = Console.ReadLine().ToLower();
+                
                 // Allows player to leave to the main menu
-                if (navigationInput == "back")
+                if (input == "back")
                     Menu();
 
                 // Quits the game
-                if (navigationInput == "quit")
+                if (input == "quit")
                     Quit();
 
-                // Travels north if the user inputs north
-                if (navigationInput == "north" || navigationInput == "n")
+                Room nextRoom = null;
+                switch (input)
                 {
-                    if (player.CurrentRoom.North)
-                    {
-                        player.CurrentRoom = safeRoom;
-                        Console.WriteLine($"Moving to {player.CurrentRoom.Name}...");
-                        Thread.Sleep(1000);
+                    case "north":
+                        nextRoom = player.CurrentRoom.North;
                         break;
-                    }
-                }
-
-                // Travels south if the user inputs south
-                if (navigationInput == "south" || navigationInput == "s")
-                {
-                    if (player.CurrentRoom.South)
-                    {
-                        player.CurrentRoom = monsterRoom;
-                        Console.WriteLine($"Moving to {player.CurrentRoom.Name}...");
-                        Thread.Sleep(2000);
-                        CheckMonsterRoom();
+                    case "south":
+                        nextRoom = player.CurrentRoom.South;
                         break;
-                    }
+                    case "east":
+                        nextRoom = player.CurrentRoom.East;
+                        break;
+                    case "west":
+                        nextRoom = player.CurrentRoom.West;
+                        break;
+                    default:
+                        Console.WriteLine("This is not a valid input. Try again!");
+                        break;
                 }
-
-                // Error checking preventing the player from entering a room that does not exist
-                else if (navigationInput == "west" || navigationInput == "w")
-                {
-                    Console.WriteLine("Invalid direction. Please try again!");
-                    Console.ReadKey();
-                }
-
-                else if (navigationInput == "east" || navigationInput == "e")
-                {
-                    Console.WriteLine("Invalid direction. Please try again!");
-                    Console.ReadKey();
-                }
-
+                if (nextRoom == null)
+                    Console.WriteLine("Cannot go that way!");
                 else
                 {
-                    Console.WriteLine("Invalid input. Please try again!");
-                    Console.ReadKey();
+                    player.CurrentRoom = nextRoom;
                 }
             }
         }
@@ -251,8 +281,9 @@ namespace DungeonExplorer
             else if (combatInput == "4")
             {
                 Console.Clear();
-                Console.WriteLine("You ran back to the safe room.");
-                player.CurrentRoom = safeRoom;
+                
+                Console.WriteLine("You ran!");
+                player.CurrentRoom = entrance;
                 monster.Health = 50;
                 Console.WriteLine("Press any key to continue...");
                 Console.ReadLine();
@@ -279,8 +310,8 @@ namespace DungeonExplorer
             monster.Health = 0;
             MonsterDeath();
         }
-        Console.ReadKey();
-        monster.IsAlive = false; 
+        monster.IsAlive = false;
+        player.CurrentRoom.Creature = false;
         }
 
         // Checks if monster is alive or not, if so, start combat
@@ -299,11 +330,14 @@ namespace DungeonExplorer
             // Check if the monster health is exactly 0 when dead. If not, there is an error message
             // Debug.Assert(monster.Health == 0, $"Monster health should be 0 when killed. Monster Health is: {monster.Health}");
             
-            Console.WriteLine($"They dropped an item: '{monster.Item}'.");
-            // Use of Player.PickUpItem
-            player.PickUpItem(monster.Item);
-            Console.WriteLine($"+1 {monster.Item}");
-            Console.WriteLine("Press any key to continue...");
+            if (!monster.HasDroppedItem)
+            {
+                Console.WriteLine($"They dropped an item: '{monster.Item}'.");
+                player.PickUpItem(monster.Item);
+                Console.WriteLine($"+1 {monster.Item}");
+                monster.HasDroppedItem = true;
+            }
+            Console.WriteLine("\nPress any key to continue...");
             Console.ReadKey();
         }
 
@@ -312,6 +346,35 @@ namespace DungeonExplorer
             Console.Clear();
             Console.WriteLine("Game Over! You lose...");
             Environment.Exit(0);
+        }
+
+        public void CheckRoom(Room room)
+        {
+            if (player.CurrentRoom == entrance)
+            {
+                Console.Clear();
+                Console.WriteLine("There is a Wooden Chest. You need a Diamond Key to open it");
+                if (player.inventory.Contains("Diamond Key"))
+                {
+                    Console.WriteLine("You can open the chest!");
+                    Open();
+                }
+                else
+                    Console.WriteLine("You can't open the chest!");
+                Console.ReadKey();
+            }
+            else
+            {
+                Console.Clear();
+                Console.WriteLine("There is nothing in this room.");
+                Console.ReadKey();
+            }
+        }
+
+        public void Open()
+        {
+            Console.WriteLine("Opening chest...");
+            
         }
     }
 }

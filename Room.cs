@@ -4,18 +4,17 @@
     {
         private string _name;
         private string _description;
-        private bool _monster;
-        private bool _north;
-        private bool _south;
+        private bool _creature;
+        private Room _north;
+        private Room _east;
+        private Room _south;
+        private Room _west;
 
-        public Room(string name, string description, bool monster, bool north, bool south)
+        public Room(string name, string description, bool creature)
         {
             Name = name;
             Description = description;
-            Monster = monster;
-            North = north;
-            South = south;
-
+            Creature = creature;
         }
 
         // Getters and setters, for the rooms, name, description, if there is a monster or not, and the directions
@@ -26,58 +25,42 @@
 
         public string Name
         {
-            get
-            {
-                return _name;
-            }
-            set
-            {
-                _name = value;
-            }
+            get => _name;
+            set => _name = value;
         }
         public string Description
         {
-            get
-            {
-                return _description;
-            }
-            set
-            {
-                _description = value;
-            }
+            get => _description;
+            set => _description = value;
         }
-        public bool Monster
+        public bool Creature
         {
-            get
-            {
-                return _monster;
-            }
-            set
-            {
-                _monster = value;
-            }
+            get => _creature;
+            set => _creature = value;
         }
-        public bool North
+
+        public Room North
         {
-            get
-            {
-                return _north;
-            }
-            set
-            {
-                _north = value;
-            }
+            get => _north;
+            set => _north = value;
         }
-        public bool South
+
+        public Room East
         {
-            get
-            {
-                return _south;
-            }
-            set
-            {
-                _south = value;
-            }
+            get => _east;
+            set => _east = value;
+        }
+        
+        public Room South
+        {
+            get => _south;
+            set => _south = value;
+        }
+
+        public Room West
+        {
+            get => _west;
+            set => _west = value;
         }
     }
 }

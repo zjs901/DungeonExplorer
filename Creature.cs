@@ -21,7 +21,7 @@ namespace DungeonExplorer
             MaxDamage = maxDamage;
             MinDamage = minDamage;
         }
-
+        // Has two different overrides depending on who is attacking
         public abstract void Attack(Creature target);
         
         // Getters and setters, for the players, current room, name, health, and damage

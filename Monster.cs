@@ -2,9 +2,11 @@
 
 namespace DungeonExplorer
 {
+    // Use of abstract class
     public class Monster : Creature
     {
         private bool _isAlive;
+        public bool HasDroppedItem { get; set; }
         private string _item;
 
         public Monster(Room monsterRoom, string name, int health, int maxDamage, int minDamage, bool isAlive, string item) 
@@ -14,7 +16,7 @@ namespace DungeonExplorer
             IsAlive = isAlive;
             _item = item;
         }
-        
+        // Use of override
         public override void Attack(Creature target)
         {
             int monsterAttack = rand.Next(MinDamage, MaxDamage + 1);
