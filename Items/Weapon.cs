@@ -1,19 +1,23 @@
+using System;
+
 namespace DungeonExplorer.Items
 {
-    public abstract class Weapon : Item
+    public class Weapon : Item
     {
         public Weapon(string name, string description, int damage)
             :base(name, description)
         {
-            EquippedDamage = damage;
+            Damage = damage;
         }
         
-        public int EquippedDamage
+        public int Damage
         {
             get;
             set;
         }
         
-        
+        public override void Use(Player player)
+        {
+        }
     }
 }

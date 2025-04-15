@@ -2,7 +2,8 @@
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using System.Collections.Generic;  
+using System.Collections.Generic;
+using DungeonExplorer.Items;
 
 
 namespace DungeonExplorer
@@ -18,6 +19,10 @@ namespace DungeonExplorer
         public Room chestRoom { get; private set; }
         public Room bossRoom { get; private set; }
         
+        public Potion HealingPotion { get; private set; }
+        public Weapon StoneSword { get; private set; }
+
+        
         private List<Room> _rooms;
         private Room _entrance;
 
@@ -27,6 +32,10 @@ namespace DungeonExplorer
             InitializeRooms();
             player = new Player(StartingRoom(), "", 100, 15, 10);
             monster = new Monster(monsterRoom, "The Kernel", 50, 15, 5, true, "Diamond Key");
+            
+            // Items
+            HealingPotion = new Potion("Potion of Healing", "Can be used to heal you", 25);
+            StoneSword = new Weapon("Stone Sword", "Might sword made of stone", 25);
         }
 
         public void InitializeRooms()
@@ -66,8 +75,9 @@ namespace DungeonExplorer
         {
             bool playing = true;
             
-            // Combat(); - [testing purposes]
-
+            // Add potion to inventory
+            //player.PickUpItem(HealingPotion.ItemName);
+            
             Console.WriteLine("Welcome to the Dungeon!");
 
             // Checking name is valid
@@ -94,7 +104,7 @@ namespace DungeonExplorer
                 Menu();
             }
         }
-
+        
         // Quit game
         public void Quit()
         {
@@ -119,10 +129,7 @@ namespace DungeonExplorer
             if (menuInput == "1")
             {
                 // View Inventory
-                Console.Clear();
-                Console.WriteLine($"Your Inventory: {player.InventoryContents()}\n");
-                Console.WriteLine("Press any key to continue...");
-                Console.ReadLine();
+                ViewInventory();
             }
             else if (menuInput == "2")
             {
@@ -272,10 +279,7 @@ namespace DungeonExplorer
             // View inventory
             else if (combatInput == "3")
             {
-                Console.Clear();
-                Console.WriteLine($"Inventory: {player.InventoryContents()}");
-                Console.WriteLine("Press any key to continue...");
-                Console.ReadLine();
+                ViewInventory();
             }
             // Run from the monster
             else if (combatInput == "4")
@@ -375,6 +379,14 @@ namespace DungeonExplorer
         {
             Console.WriteLine("Opening chest...");
             
+        }
+
+        public void ViewInventory()
+        {
+            Console.Clear();
+            Console.WriteLine($"Inventory: {player.InventoryContents()}");
+            Console.WriteLine("\nPress any key to continue...");
+            Console.ReadKey();
         }
     }
 }
