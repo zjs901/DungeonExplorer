@@ -19,6 +19,8 @@ namespace DungeonExplorer.Items
         public override void Use(Player player)
         {
             Console.WriteLine($"You consume a {ItemName}, for {HealthPoints} health points.");
+            Console.WriteLine($"{player.Name} has {player.Health} health points.");
+            player.Health += HealthPoints;
         }
     }
 }

@@ -9,8 +9,8 @@ namespace DungeonExplorer
         public bool HasDroppedItem { get; set; }
         private string _item;
 
-        public Boss(Room monsterRoom, string name, int health, int maxDamage, int minDamage, bool isAlive, string item) 
-            : base(monsterRoom, name, health, maxDamage, minDamage) 
+        public Boss(Room bossRoom, string name, int health, int maxDamage, int minDamage, bool isAlive, string item) 
+            : base(bossRoom, name, health, maxDamage, minDamage) 
         {
 
             IsAlive = isAlive;
