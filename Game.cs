@@ -31,6 +31,11 @@ namespace DungeonExplorer
 
         public Game()
         {
+            // Call testing classes to begind testing
+            TestPlayerAttack();
+            TestPotionHealing();
+            TestInventoryAdd();
+
             InitializeRooms();
             player = new Player(StartingRoom(), "", 100, 15, 10);
 
@@ -47,10 +52,10 @@ namespace DungeonExplorer
         {
             // Initialize the game with rooms and one player
             _rooms = new List<Room>(); // Create lists of rooms
-            entrance = new Room("Entrance", "PLACEHOLDER", false);
-            monsterRoom = new Room("Monster Room", "PLACEHOLDER", true);
-            chestRoom = new Room("Chest Room", "PLACEHOLDER", false);
-            bossRoom = new Room("Boss Room", "PLACEHOLDER", true);
+            entrance = new Room("Entrance", "A dark, candle lit room, with 3 doors to choose from", false);
+            monsterRoom = new Room("Monster Room", "There are broken chains and the wall, as if someone has escaped", true);
+            chestRoom = new Room("Chest Room", "A bright room, with display cabinets", false);
+            bossRoom = new Room("Boss Room", "A circular room with large trees climbing up the walls", true);
             
             // Connecting Rooms
             entrance.East = chestRoom;
@@ -117,53 +122,58 @@ namespace DungeonExplorer
             Environment.Exit(0);
         }
 
-        // Display the menu for the user
+        // Display the menu for the user and use error handling to control the input
         public void Menu()
         {
             Console.Clear();
-            // Use of Room.GetDescription()
             Console.WriteLine($"{player.Name}, you are in the {player.CurrentRoom.Name}. {player.CurrentRoom.GetDescription()}.");
             Console.WriteLine("Actions");
             Console.WriteLine("1. View Inventory");
             Console.WriteLine("2. Show Stats");
             Console.WriteLine("3. Travel");
             Console.WriteLine("4. Check Room");
-            Console.WriteLine("5. Quit"); Console.Write("> ");
+            Console.WriteLine("5. Quit");
+
+            Console.Write("> ");
             string menuInput = Console.ReadLine();
 
-            if (menuInput == "1")
+            // Input validation
+            if (!int.TryParse(menuInput, out int choice) || choice < 1 || choice > 5)
             {
-                // View Inventory
-                ViewInventory();
+                Console.WriteLine("Invalid input! Please enter a number (1-5).");
+                Console.WriteLine("Press any key to continue...");
                 Console.ReadKey();
+                // Re-display menu
+                Menu();
+                return;
             }
-            else if (menuInput == "2")
-            {
-                // Shows Stats
-                Console.Clear();
-                Console.WriteLine("Your Stats:");
-                Console.WriteLine($"HEALTH: {player.Health} DAMAGE: {player.MinDamage}-{player.MaxDamage}\n");
-                Console.WriteLine("Press any key to continue...");
-                Console.ReadLine();
-            }
-            else if (menuInput == "3")
-                // Navigate Map
-                Navigation();
-            else if (menuInput == "4")
-                // Checks room for items etc...
-                CheckRoom(player.CurrentRoom);
-            else if (menuInput == "5")
-                // Quits the game
-                Quit();
-            else
-            {
-                Console.WriteLine("This is not a valid input. Try again!");
-                Console.WriteLine("Press any key to continue...");
-                Console.ReadLine();
-            }
-            Menu();
-        }
 
+            switch (choice)
+            {
+                case 1:
+                    ViewInventory();
+                    Console.ReadKey();
+                    break;
+                case 2:
+                    Console.Clear();
+                    Console.WriteLine($"HEALTH: {player.Health} DAMAGE: {player.MinDamage}-{player.MaxDamage}\n");
+                    Console.WriteLine("Press any key to continue...");
+                    Console.ReadLine();
+                    break;
+                case 3:
+                    Navigation();
+                    break;
+                case 4:
+                    CheckRoom(player.CurrentRoom);
+                    break;
+                case 5:
+                    Quit();
+                    break;
+            }
+            // Return to menu
+            Menu();
+
+        }
         public void Navigation()
         {
             while (true)
@@ -183,13 +193,12 @@ namespace DungeonExplorer
                 if (player.CurrentRoom.East != null) Console.WriteLine($"- East to {player.CurrentRoom.East.Name}");
                 if (player.CurrentRoom.West != null) Console.WriteLine($"- West to {player.CurrentRoom.West.Name}");
                 
-                Console.Write(">");
+                Console.Write("> ");
                 string input = Console.ReadLine().ToLower();
                 
                 // Allows player to leave to the main menu
                 if (input == "back")
-                    Menu();
-
+                  Menu();
                 // Quits the game
                 if (input == "quit")
                     Quit();
@@ -241,57 +250,68 @@ namespace DungeonExplorer
 
                 string combatInput = Console.ReadLine()?.Trim();
 
-                if (combatInput == "1") // Attack
+                // Error handling for combat input
+                if (!int.TryParse(combatInput, out int combat) || combat < 1 || combat > 4)
                 {
-                    Console.Clear();
-                    Console.WriteLine("Attacking...");
-                    player.Attack(currentMonster);
-
-                    if (currentMonster.Health <= 0)
-                        currentMonster.Health = 0;
-
-                    currentMonster.Attack(player);
-                    player.Health = Math.Max(0, player.Health);
-
-                    Console.WriteLine($"You have {player.Health} health\n{currentMonster.Name} has {currentMonster.Health} health.");
-                    Console.WriteLine("\nPress any key to continue...");
-                    Console.ReadLine();
-                }
-                else if (combatInput == "2") // Defend
-                {
-                    Console.Clear();
-                    Console.WriteLine("Defending...");
-
-                    int monsterAttack = rand.Next(currentMonster.MinDamage, currentMonster.MaxDamage + 1);
-                    int defendAttack = monsterAttack / 2;
-                    player.Health -= defendAttack;
-                    player.Health = Math.Max(0, player.Health);
-
-                    Console.WriteLine($"You defended against {currentMonster.Name}'s attack, reducing damage from {monsterAttack} to {defendAttack}.");
-                    Console.WriteLine($"You have {player.Health} health\n{currentMonster.Name} has {currentMonster.Health} health.");
-                    Console.WriteLine("\nPress any key to continue...");
-                    Console.ReadLine();
-                }
-                else if (combatInput == "3") // Inventory
-                {
-                    ViewInventory();
-                    Console.ReadKey();
-                }
-                else if (combatInput == "4") // Run
-                {
-                    Console.Clear();
-                    Console.WriteLine("You ran!");
-                    player.CurrentRoom = entrance;
-                    currentMonster.Health = (currentMonster == boss) ? 75 : 25; // Reset health
+                    Console.WriteLine("Invalid input! Please enter a number (1-4).");
                     Console.WriteLine("Press any key to continue...");
-                    Console.ReadLine();
-                    Navigation();
-                    return;
+                    Console.ReadKey();
+                    // Re-display combat options
+                    continue;
                 }
-                else
+
+
+                switch (combat)
                 {
-                    Console.WriteLine("Invalid input, try again...");
-                    Console.ReadLine();
+                    case 1:
+                        // Attack
+                        Console.Clear();
+                        Console.WriteLine("Attacking...");
+                        player.Attack(currentMonster);
+
+                        if (currentMonster.Health <= 0)
+                            currentMonster.Health = 0;
+
+                        currentMonster.Attack(player);
+                        player.Health = Math.Max(0, player.Health);
+
+                        Console.WriteLine($"You have {player.Health} health\n{currentMonster.Name} has {currentMonster.Health} health.");
+                        Console.WriteLine("\nPress any key to continue...");
+                        Console.ReadLine(); 
+                        break;
+                    case 2:
+                        // Defend
+                        Console.Clear();
+                        Console.WriteLine("Defending...");
+
+                        int monsterAttack = rand.Next(currentMonster.MinDamage, currentMonster.MaxDamage + 1);
+                        int defendAttack = monsterAttack / 2;
+                        player.Health -= defendAttack;
+                        player.Health = Math.Max(0, player.Health);
+
+                        Console.WriteLine($"You defended against {currentMonster.Name}'s attack, reducing damage from {monsterAttack} to {defendAttack}.");
+                        Console.WriteLine($"You have {player.Health} health\n{currentMonster.Name} has {currentMonster.Health} health.");
+                        Console.WriteLine("\nPress any key to continue...");
+                        Console.ReadLine();
+                        break;
+                    case 3:
+                        // View inventory
+                        ViewInventory();
+                        Console.ReadKey();
+                        break;
+                    case 4:
+                        // Run away
+                        Console.Clear();
+                        Console.WriteLine("You ran!");
+                        player.CurrentRoom = entrance;
+                        currentMonster.Health = (currentMonster == boss) ? 75 : 25; // Reset health
+                        Console.WriteLine("Press any key to continue...");
+                        Console.ReadLine();
+                        Navigation();
+                        return;
+                    default:
+                        Console.WriteLine("Invalid input, try again...");
+                        break;
                 }
             }
 
@@ -372,10 +392,24 @@ namespace DungeonExplorer
             Console.WriteLine("Opening chest...");
         }
 
+        // View inventory with LINQ filtering
         public void ViewInventory()
         {
             Console.Clear();
             Console.WriteLine("Inventory:");
+
+            var weapons = player.inventory.Where(item => item.Contains("Sword")).ToList();
+
+            // Lists any weapons in the inventory
+            if (weapons.Any())
+            {
+                Console.WriteLine("\nWeapons:");
+                foreach (var weapon in weapons)
+                {
+                    Console.WriteLine($"- {weapon}");
+                }
+            }
+
             Console.WriteLine(player.InventoryContents());
 
             if (player.inventory.Contains("Potion of Healing"))
@@ -392,7 +426,10 @@ namespace DungeonExplorer
                 Console.WriteLine("Press any key to continue...");
                 Console.ReadKey();
             }
+            Console.ReadKey();
         }
+
+        // When monster dies
         public void MonsterDeath(Monster defeatedMonster)
         {
             if (!defeatedMonster.HasDroppedItem)
@@ -404,6 +441,53 @@ namespace DungeonExplorer
             }
             Console.WriteLine("\nPress any key to continue...");
             Console.ReadKey();
+        }
+
+        // TESTING CLASSES
+        public static void TestPlayerAttack()
+        {
+            // Test the Player's attack method
+            Console.WriteLine("=== Testing Player Attack ===");
+            Player testPlayer = new Player(null, "Tester", 100, 10, 5);
+            Monster testMonster = new Monster(null, "Dummy", 50, 5, 0, true, "");
+
+            // Simulates an attack
+            int initialHealth = testMonster.Health;
+            testPlayer.Attack(testMonster);
+
+            // Check if the monster's health has decreased
+            Console.WriteLine($"Monster health before: {initialHealth}, after: {testMonster.Health}");
+            Debug.Assert(testMonster.Health < initialHealth, "Attack should reduce monster health.");
+            Console.WriteLine("Test passed!\n");
+        }
+        public static void TestPotionHealing()
+        {
+            // Test the Potion's healing effect
+            Console.WriteLine("=== Testing Potion Healing ===");
+            Player testPlayer = new Player(null, "Tester", 50, 10, 5);
+            Potion testPotion = new Potion("Healing Potion", "Heals 20 HP", 20);
+
+            // Simulates using a potion
+            testPlayer.Health = 30;
+            int healthBefore = testPlayer.Health;
+            testPotion.Use(testPlayer);
+
+            // Check if the player's health has increased
+            Console.WriteLine($"Health before: {healthBefore}, after: {testPlayer.Health}");
+            Debug.Assert(testPlayer.Health == 50, "Potion should heal to full.");
+            Console.WriteLine("Test passed!\n");
+        }
+        public static void TestInventoryAdd()
+        {
+            // Test adding an item to the inventory
+            Console.WriteLine("=== Testing Inventory ===");
+            Player testPlayer = new Player(null, "Tester", 100, 10, 5);
+            testPlayer.PickUpItem("Sword");
+
+            // Check if the item is in the inventory
+            Console.WriteLine($"Inventory contains Sword: {testPlayer.inventory.Contains("Sword")}");
+            Debug.Assert(testPlayer.inventory.Contains("Sword"), "Sword should be in inventory.");
+            Console.WriteLine("Test passed!\n");
         }
     }
 }
